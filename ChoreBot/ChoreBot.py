@@ -13,6 +13,11 @@ intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+async def load():
+    for filename in os.listdir('./commands'):
+        if filename.endswith('.py'):
+            await bot.load_extension(f'commands.{filename[:-3]}')
+
 @bot.event
 async def on_ready():
     guild_info = GuildInfo(bot.guilds)
@@ -23,6 +28,7 @@ async def on_ready():
 #     await ctx.send("this bot is up and running!")
     
 async def main():
+    await load()
     await bot.start(DISCORD_TOKEN)
     
 

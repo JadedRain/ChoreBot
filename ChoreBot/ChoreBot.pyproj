@@ -22,12 +22,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ChoreBot.py" />
+    <Compile Include="commands\chore_commands.py" />
+    <Compile Include="pclasses\chore.py" />
     <Compile Include="pclasses\guild_info.py" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".env" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="commands\" />
     <Folder Include="pclasses\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
