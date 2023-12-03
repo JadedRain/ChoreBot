@@ -12,26 +12,34 @@ class ChoreCommands(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
+        self.person_setup()
         print("Chore commands loaded")
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
-        c = Chore(random.choice(list(self.person_list.keys())), ' '.join(chore_name[:]).title())
+        c = Chore(' '.join(chore_name[:]).title())
         self.chore_list.append(c)
         
     @commands.command(name="shchores")
     async def show_chores(self, ctx):
         for i in range(len(self.chore_list)):
-            await ctx.channel.send(self.chore_list[i].get_chore())
+            await ctx.channel.send(f"Chore: {self.chore_list[i].get_chore()} Person: <@{self.chore_list[i].get_person()}>")
             
-    @commands.command(name="addppl")
-    async def person_setup(self, ctx):
-        guild = ctx.message.guild
-        role = discord.utils.find(lambda r: r.name.lower() == "roommate", guild.roles)
-        for member in guild.members:
-            if role in member.roles:
-               self.person_list[member.display_name] = member.id
-               print(f"{member.display_name} added")
+    @commands.command(name="assign")
+    async def assign_chores(self, ctx):
+        for chore in self.chore_list:
+            chore.set_person(random.choice(list(self.person_list.values())))
+
+            
+    
+    # adds users to pick from for chores
+    def person_setup(self):
+        guilds = self.bot.guilds
+        for guild in guilds:
+            role = discord.utils.find(lambda r: r.name.lower() == "roommate", guild.roles)
+            for member in guild.members:
+                if role in member.roles:
+                   self.person_list[member.display_name] = member.id
             
 async def setup(bot):
     await bot.add_cog(ChoreCommands(bot))

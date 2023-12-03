@@ -22,11 +22,7 @@ async def load():
 async def on_ready():
     guild_info = GuildInfo(bot.guilds)
     await guild_info.list_guild_info()
-    
-# @bot.command(name="test")
-# async def test(ctx):
-#     await ctx.send("this bot is up and running!")
-    
+
 async def main():
     await load()
     await bot.start(DISCORD_TOKEN)
