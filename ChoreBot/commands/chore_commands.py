@@ -32,7 +32,7 @@ class ChoreCommands(commands.Cog):
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
         for chore in self.guilds[ctx.guild.id].chore_list:
-            chore.set_person(random.choice(list(self.person_list.values())))
+            chore.set_person(random.choice(list(self.guilds[ctx.guild.id].person_list.values())))
             
     @commands.command(name="complete")
     async def complete_chore(self, ctx, *chore):
