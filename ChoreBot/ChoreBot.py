@@ -5,7 +5,6 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from pclasses.guild_info import GuildInfo
 
-
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -21,7 +20,15 @@ async def load():
 @bot.event
 async def on_ready():
     guild_info = GuildInfo(bot.guilds)
+    guilds = guild_info.get_guilds()
     await guild_info.list_guild_info()
+    
+@bot.event
+async def on_guild_join(guild):
+    print(f"Joined: {guild.name}")
+    
+async def setup():
+    pass
 
 async def main():
     await load()
