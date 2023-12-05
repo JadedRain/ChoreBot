@@ -26,9 +26,6 @@ async def on_ready():
 @bot.event
 async def on_guild_join(guild):
     print(f"Joined: {guild.name}")
-    
-async def setup():
-    pass
 
 async def main():
     await load()

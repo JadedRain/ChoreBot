@@ -14,6 +14,10 @@ class ChoreCommands(commands.Cog):
     async def on_ready(self):
         self.setup()
         print("Chore commands loaded")
+    
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        self.guilds[guild.id] = GuildChore(guild)
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
