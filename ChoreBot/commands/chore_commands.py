@@ -18,21 +18,21 @@ class ChoreCommands(commands.Cog):
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
         c = Chore(' '.join(chore_name[:]).title())
-        self.guilds[ctx.guild].add_chore(c)
+        self.guilds[ctx.guild.id].add_chore(c)
         
     @commands.command(name="shchores")
     async def show_chores(self, ctx):
-        for i in range(len(self.guilds[ctx.guild].chore_list)):
-            await ctx.channel.send(f"Chore: {self.guilds[ctx.guild].chore_list[i].get_chore()} Person: <@{self.guilds[ctx.guild].chore_list[i].get_person()}> Completed: {self.guilds[ctx.guild].chore_list[i].completed}")
+        for i in range(len(self.guilds[ctx.guild.id].chore_list)):
+            await ctx.channel.send(f"Chore: {self.guilds[ctx.guild.id].chore_list[i].get_chore()} Person: <@{self.guilds[ctx.guild.id].chore_list[i].get_person()}> Completed: {self.guilds[ctx.guild.id].chore_list[i].completed}")
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
-        for chore in self.guilds[ctx.guild].chore_list:
+        for chore in self.guilds[ctx.guild.id].chore_list:
             chore.set_person(random.choice(list(self.person_list.values())))
             
     @commands.command(name="complete")
     async def complete_chore(self, ctx, *chore):
-        for c in self.guilds[ctx.guild].chore_list:
+        for c in self.guilds[ctx.guild.id].chore_list:
             if c.get_chore() == ' '.join(chore[:]).title() and ctx.author.id == c.get_person():
                 c.completed = True
             
