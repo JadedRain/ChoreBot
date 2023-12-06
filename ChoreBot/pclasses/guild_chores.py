@@ -11,6 +11,11 @@ class GuildChore:
 
     def add_chore(self, chore):
         self.chore_list.append(chore)
+    
+    def remove_chore(self, chore_name):
+        for chore in self.chore_list:
+            if chore.get_chore().lower() == chore_name:
+                self.chore_list.remove(chore)
 
     # adds users to pick from for chores
     def person_setup(self):

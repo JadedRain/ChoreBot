@@ -5,6 +5,10 @@ from discord.ui import view
 from pclasses.chore import Chore
 from pclasses.guild_chores import GuildChore
 
+# TODO
+# Ability to remove chores
+# Remove server from guilds if the bot is removed from the server while the bot is still active
+
 class ChoreCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -23,6 +27,10 @@ class ChoreCommands(commands.Cog):
     async def add_chore(self, ctx, *chore_name):
         c = Chore(' '.join(chore_name[:]).title())
         self.guilds[ctx.guild.id].add_chore(c)
+    
+    @commands.command(name="rmchore")
+    async def remove_chore(self, ctx, *chore_name):
+        self.guilds[ctx.guild.id].remove_chore(' '.join(chore_name[:]))
         
     @commands.command(name="shchores")
     async def show_chores(self, ctx):
