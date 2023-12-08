@@ -1,4 +1,5 @@
 import discord
+import discord.ui
 import random
 from discord.ext import commands
 from discord.ui import view
@@ -36,8 +37,12 @@ class ChoreCommands(commands.Cog):
         
     @commands.command(name="shchores")
     async def show_chores(self, ctx):
+        embed = discord.Embed()
+        embed.title = "Chore List"
+        embed.description = "Chores that need to be done"
         for i in range(len(self.guilds[ctx.guild.id].chore_list)):
-            await ctx.channel.send(f"Chore: {self.guilds[ctx.guild.id].chore_list[i].get_chore()} Person: <@{self.guilds[ctx.guild.id].chore_list[i].get_person()}> Completed: {self.guilds[ctx.guild.id].chore_list[i].completed}")
+            embed.add_field(name = f"Chore: {self.guilds[ctx.guild.id].chore_list[i].get_chore()} Completed: {self.guilds[ctx.guild.id].chore_list[i].completed}", value=f"Person: <@{self.guilds[ctx.guild.id].chore_list[i].get_person()}>" )
+            await ctx.channel.send(embed=embed)
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
