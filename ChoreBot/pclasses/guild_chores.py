@@ -1,11 +1,13 @@
 import discord
 from pclasses.chore import Chore
+from pclasses.chore_view import ChoreView
 
 class GuildChore:
     def __init__(self, guild):    
         self.guild = guild;
         self.chore_list = []
         self.person_list = {}
+        self.chore_view = ChoreView()
         self.person_setup()
         
 

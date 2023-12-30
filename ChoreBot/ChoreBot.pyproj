@@ -24,6 +24,7 @@
     <Compile Include="ChoreBot.py" />
     <Compile Include="commands\chore_commands.py" />
     <Compile Include="pclasses\chore.py" />
+    <Compile Include="pclasses\chore_view.py" />
     <Compile Include="pclasses\guild_chores.py" />
     <Compile Include="pclasses\guild_info.py" />
   </ItemGroup>

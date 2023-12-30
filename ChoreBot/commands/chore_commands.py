@@ -1,6 +1,7 @@
 import discord
 import discord.ui
 import random
+import time
 from discord.ext import commands
 from discord.ui import view
 from pclasses.chore import Chore
@@ -25,6 +26,8 @@ class ChoreCommands(commands.Cog):
     async def on_guild_remove(self, guild):
         del self.guilds[guild.id]
         
+    # Add event listener for when roles update.
+        
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
@@ -37,12 +40,11 @@ class ChoreCommands(commands.Cog):
         
     @commands.command(name="shchores")
     async def show_chores(self, ctx):
-        embed = discord.Embed()
-        embed.title = "Chore List"
-        embed.description = "Chores that need to be done"
-        for i in range(len(self.guilds[ctx.guild.id].chore_list)):
-            embed.add_field(name = f"Chore: {self.guilds[ctx.guild.id].chore_list[i].get_chore()} Completed: {self.guilds[ctx.guild.id].chore_list[i].completed}", value=f"Person: <@{self.guilds[ctx.guild.id].chore_list[i].get_person()}>" )
-            await ctx.channel.send(embed=embed)
+        self.guilds[ctx.guild.id].chore_view.create_pages(self.guilds[ctx.guild.id].chore_list)
+        embed = self.guilds[ctx.guild.id].chore_view.chore_list_embed
+        view = self.guilds[ctx.guild.id].chore_view
+        await ctx.channel.send(embed=embed, view = view)
+
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
