@@ -27,7 +27,14 @@ class ChoreCommands(commands.Cog):
         del self.guilds[guild.id]
         
     # Add event listener for when roles update.
-        
+    @commands.Cog.listener()
+    async def on_member_update(self, before, after):
+        guild = before.guild
+        if after.id in self.guilds[guild.id].chore_role.members:
+            self.guilds[guild.id].add_person(after)
+        elif after.id not in self.guilds[guild.id].chore_role.members:
+            self.guilds[guild.id].remove_person(after)
+      
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
@@ -44,12 +51,11 @@ class ChoreCommands(commands.Cog):
         embed = self.guilds[ctx.guild.id].chore_view.chore_list_embed
         view = self.guilds[ctx.guild.id].chore_view
         await ctx.channel.send(embed=embed, view = view)
-
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
         for chore in self.guilds[ctx.guild.id].chore_list:
-            chore.set_person(random.choice(list(self.guilds[ctx.guild.id].person_list.values())))
+            chore.set_person(random.choice(list(self.guilds[ctx.guild.id].person_list.keys())))
             
     @commands.command(name="complete")
     async def complete_chore(self, ctx, *chore):
