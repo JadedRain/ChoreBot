@@ -33,8 +33,8 @@ class ChoreView(discord.ui.View):
                  page = page_setup()
         if len(page.fields):
             self.chore_pages.append(page)
-        
-        self.chore_list_embed = self.chore_pages[0]
+        if len(self.chore_pages) > 0:
+            self.chore_list_embed = self.chore_pages[0]
     
     @discord.ui.button(label="Prev Page")
     async def previous_page(self, interaction: discord.Interaction, button: discord.ui.Button):
