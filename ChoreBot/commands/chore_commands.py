@@ -57,6 +57,11 @@ class ChoreCommands(commands.Cog):
         embed = self.guilds[ctx.guild.id].chore_view.chore_list_embed
         view = self.guilds[ctx.guild.id].chore_view
         await ctx.channel.send(embed=embed, view = view)
+        
+    @commands.command(name="setchan")
+    async def set_announcement_channel(self, ctx):
+        self.guilds[ctx.guild.id].announcement_channel = ctx.channel.id
+        await ctx.channel.send("Channel has been set")
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
@@ -82,15 +87,19 @@ class ChoreCommands(commands.Cog):
             view = guild.chore_view
             if len(view.chore_pages) > 0:
                 channel = None
-                for c in guild.guild.text_channels:
-                    if c.name.lower() == "general":
-                        channel = c
-                        break
+                if guild.announcement_channel:
+                    channel = self.bot.get_channel(guild.announcement_channel)
+                else:
+                    for c in guild.guild.text_channels:
+                        if c.name.lower() == "general":
+                            channel = c
+                            break
                 await channel.send(embed=embed, view = view)
             
     def scheduler_setup(self):
         s = AsyncIOScheduler()
-        s.add_job(self.show_chores_scheduled, 'cron', hour = 9)
+        # s.add_job(self.show_chores_scheduled, 'cron', hour = 9)
+        s.add_job(self.show_chores_scheduled, 'interval', seconds = 5)
 
         return s
 

@@ -8,7 +8,7 @@ class GuildChore:
         self.chore_list = []
         self.person_list = {}
         self.chore_view = ChoreView()
-        # self.chore_view
+        self.announcement_channel = None
         self.chore_role_name = "roommate"
         self.chore_role = discord.utils.find(lambda r: r.name.lower() == self.chore_role_name, self.guild.roles)
         self.person_setup()
