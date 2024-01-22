@@ -18,8 +18,6 @@ class ChoreCommands(commands.Cog):
         self.bot = bot
         self.guilds = {}
         self.scheduler = AsyncIOScheduler()
-        
-        
     
     @commands.Cog.listener()
     async def on_ready(self):
@@ -42,7 +40,6 @@ class ChoreCommands(commands.Cog):
             self.guilds[guild.id].add_person(after)
         elif after.id not in self.guilds[guild.id].chore_role.members:
             self.guilds[guild.id].remove_person(after)
-      
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
@@ -55,9 +52,10 @@ class ChoreCommands(commands.Cog):
     
     @commands.command(name="shchores")
     async def show_chores_command(self, ctx):
-        self.guilds[ctx.guild.id].chore_view.create_pages(self.guilds[ctx.guild.id].chore_list)
-        embed = self.guilds[ctx.guild.id].chore_view.chore_list_embed
-        view = self.guilds[ctx.guild.id].chore_view
+        guild = self.get_guild(ctx)
+        guild.chore_view.create_pages(guild.chore_list)
+        embed = guild.chore_view.chore_list_embed
+        view = guild.chore_view
         if len(view.chore_pages) > 0:
             await ctx.channel.send(embed=embed, view = view)
         
@@ -68,13 +66,14 @@ class ChoreCommands(commands.Cog):
         
     @commands.command(name="settime")
     async def set_guild_schedule_time(self, ctx, *time):
+        guild = self.get_guild(ctx)
         time_format = "%H:%M"
         time_info = list(time)
         try:
             tz = pytz.timezone(time_info[1])
             valid_time = datetime.datetime.strptime(time_info[0], time_format).time()
-            self.guilds[ctx.guild.id].announcement_time = valid_time
-            self.guilds[ctx.guild.id].timezone = tz
+            guild.announcement_time = valid_time
+            guild.timezone = tz
             await ctx.channel.send(f"Reminder successfully set to {valid_time.strftime('%I:%M %p')}-{tz}")
         except:
             await ctx.channel.send("Failed to change reminder time. Remember to use military time in the format HH:MM TZ (09:30 MST)") 
@@ -97,33 +96,28 @@ class ChoreCommands(commands.Cog):
             
     @commands.command(name="stop")
     async def stop_chore_announcement(self, ctx):
-        if not self.guilds[ctx.guild.id].job_started:
+        guild = self.get_guild(ctx)
+        if not guild.job_started:
             return
         else:
-            self.scheduler.remove_job(self.guilds[ctx.guild.id].pop_job())
-            self.guilds[ctx.guild.id].job_toggle()
+            self.scheduler.remove_job(guild.pop_job())
+            guild.job_toggle()
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
-        for chore in self.guilds[ctx.guild.id].chore_list:
-            chore.set_person(random.choice(list(self.guilds[ctx.guild.id].person_list.keys())))
+        guild = self.get_guild(ctx)
+        for chore in guild.chore_list:
+            chore.set_person(random.choice(list(guild.person_list.keys())))
             
     @commands.command(name="complete")
     async def complete_chore(self, ctx, *chore):
-        for c in self.guilds[ctx.guild.id].chore_list:
+        guild = self.get_guild(ctx)
+        for c in guild.chore_list:
             if c.get_chore() == ' '.join(chore[:]).title() and ctx.author.id == c.get_person():
                 c.complete()
             
-    def setup(self):
-        for guild in self.bot.guilds:
-            self.guilds[guild.id] = GuildChore(guild)
-        self.scheduler.start()
-    
-    def get_guild(self, ctx):
-        return self.guilds[ctx.guild.id]
-    
     async def show_chores_scheduled(self, ctx):
-        guild = self.guilds[ctx.guild.id]
+        guild = self.get_guild(ctx)
         guild.chore_view.create_pages(guild.chore_list)
         embed = guild.chore_view.chore_list_embed
         view = guild.chore_view
@@ -138,6 +132,13 @@ class ChoreCommands(commands.Cog):
                         break
             await channel.send(embed=embed, view = view)
             
+    def setup(self):
+        for guild in self.bot.guilds:
+            self.guilds[guild.id] = GuildChore(guild)
+        self.scheduler.start()
+            
+    def get_guild(self, ctx):
+        return self.guilds[ctx.guild.id]
             
 async def setup(bot):
     await bot.add_cog(ChoreCommands(bot))
