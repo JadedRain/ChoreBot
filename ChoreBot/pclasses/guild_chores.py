@@ -1,4 +1,6 @@
 import discord
+import datetime
+import pytz
 from pclasses.chore import Chore
 from pclasses.chore_view import ChoreView
 
@@ -9,8 +11,12 @@ class GuildChore:
         self.person_list = {}
         self.chore_view = ChoreView()
         self.announcement_channel = None
+        self.announcement_time = datetime.time(hour = 9, minute = 30)
+        self.timezone = pytz.timezone("UTC")
         self.chore_role_name = "roommate"
         self.chore_role = discord.utils.find(lambda r: r.name.lower() == self.chore_role_name, self.guild.roles)
+        self.job_started = False
+        self.job = None
         self.person_setup()
         
 
@@ -30,6 +36,20 @@ class GuildChore:
         for chore in self.chore_list:
             if chore.get_person() == member_name:
                 chore.set_person(None)
+                
+    def set_announcement(self, channel):
+        self.announcement_channel = channel
+        
+    def set_job(self, job):
+        self.job = job
+    
+    def pop_job(self):
+        t = self.job.id
+        self.job = None
+        return t
+
+    def job_toggle(self):
+        self.job_started = not self.job_started
 
     # adds users to pick from for chores
     def person_setup(self):

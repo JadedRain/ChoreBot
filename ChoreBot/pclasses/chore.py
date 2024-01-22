@@ -14,6 +14,9 @@ class Chore():
     def get_chore(self):
         return self.chore
     
+    def complete(self):
+        self.completed = True
+    
 
 
 
