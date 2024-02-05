@@ -43,6 +43,18 @@ class GuildChore:
 
     def job_toggle(self):
         self.job_started = not self.job_started
+        
+    def load_data(self, data):
+        self.chore_list = data["chore_list"]
+        self.person_list = data["person_list"]
+        self.announcement_channel = data["announcement_channel"]
+        self.announcement_time = data["announcement_time"]
+        self.timezone = data["timezone"]
+        self.chore_role_name = data["chore_role_name"]
+        self.chore_role_id = data["chore_role_id"]
+        self.job_started = data["job_started"]
+        
+
 
     # adds users to pick from for chores
     def person_setup(self, guild):

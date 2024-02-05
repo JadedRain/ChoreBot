@@ -128,6 +128,29 @@ class ChoreCommands(commands.Cog):
         with open(f"data/{guild.guild_id}.json", "w+") as write_file:
             json.dump(guild, default=lambda o: o.__dict__, fp=write_file, indent=4)
         await ctx.channel.send("It worked")
+        
+    @commands.command(name="load")
+    async def load_data(self, ctx):
+        guild = self.get_guild(ctx.guild)
+        with open(f"data/{guild.guild_id}.json", "r") as read_file:
+            data = json.load(read_file)
+        # check if a job was started during last save. if so then start job again
+        if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
+            time = datetime.datetime.strptime(data["announcement_time"], '%H:%M').time()
+            self.scheduler.add_job(self.show_chores_scheduled, 
+                                                 'cron', 
+                                                 hour = time.hour, 
+                                                 minute = time.minute, 
+                                                 timezone = guild.timezone, 
+                                                 args = [ctx], 
+                                                 id = guild.job_id)
+            guild.job_toggle()
+            
+        elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
+            self.scheduler.remove_job(data["job_id"])
+            guild.job_toggle()
+
+        await ctx.channel.send(data)
          
             
     async def show_chores_scheduled(self, ctx):
