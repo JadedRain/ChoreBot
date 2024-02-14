@@ -1,6 +1,7 @@
 import discord
 import datetime
 import pytz
+from pclasses.chore import Chore
 from pclasses.chore_view import ChoreView
 
 class GuildChore:
@@ -45,7 +46,7 @@ class GuildChore:
         self.job_started = not self.job_started
         
     def load_data(self, data):
-        self.chore_list = data["chore_list"]
+        self.chore_list.extend(self.load_chores(data["chore_list"]))
         self.person_list = data["person_list"]
         self.announcement_channel = data["announcement_channel"]
         self.announcement_time = data["announcement_time"]
@@ -54,6 +55,9 @@ class GuildChore:
         self.chore_role_id = data["chore_role_id"]
         self.job_started = data["job_started"]
         
+    def load_chores(self, chores):
+        return list(map(lambda c: Chore(c["chore"], c["completed"], c["person"]), chores))
+
 
 
     # adds users to pick from for chores

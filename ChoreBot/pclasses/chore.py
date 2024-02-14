@@ -1,8 +1,8 @@
 class Chore():
-    def __init__(self, chore):
+    def __init__(self, chore, completed=False, person=None):
         self.chore = chore
-        self.completed = False
-        self.person = None
+        self.completed = completed
+        self.person = person
         
 
     def get_person(self):
