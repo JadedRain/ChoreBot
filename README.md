@@ -15,6 +15,9 @@ The purpose of this project is to distribute and remind people in a dorm room to
 3. Be aware you must have a role in the sever that is able to add bots to servers
 
 ## Known Issues
-* If the bot goes offline there isn't a way to recover data currently
-* Reminder time can't be changed
+* ~~If the bot goes offline there isn't a way to recover data currently~~
+* ~~Reminder time can't be changed~~
 * Chores not automattically assigned
+* No autosave/autoload
+* Anybody can add/remove chores
+* Alignment broken when showing chores
