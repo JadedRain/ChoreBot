@@ -14,6 +14,7 @@ from apscheduler.triggers.cron import CronTrigger
 class ChoreCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.time_format = '%H:%M'
         self.guilds = {}
         self.scheduler = AsyncIOScheduler()
     
@@ -64,21 +65,15 @@ class ChoreCommands(commands.Cog):
     @commands.command(name="settime")
     async def set_guild_schedule_time(self, ctx, *time):
         guild = self.get_guild(ctx.guild)
-        time_format = "%H:%M"
         time_info = list(time)
         try:
-            tz = str(pytz.timezone(time_info[1]))
-            guild.timezone = tz
-            valid_time = datetime.datetime.strptime(time_info[0], time_format).time()
-            guild.announcement_time = valid_time.strftime(time_format)   
+            guild.timezone = str(pytz.timezone(time_info[1]))
+            valid_time = datetime.datetime.strptime(time_info[0], self.time_format).time()
+            guild.announcement_time = valid_time.strftime(self.time_format)   
             if guild.job_started:
-                self.scheduler.reschedule_job(guild.job_id, 
-                                            trigger='cron',
-                                            hour = valid_time.hour, 
-                                            minute = valid_time.minute, 
-                                            timezone = guild.timezone)
+                self.change_job_time(guild)
                 
-            await ctx.channel.send(f"Reminder successfully set to {valid_time.strftime('%I:%M %p')}-{tz}")
+            await ctx.channel.send(f"Reminder successfully set to {valid_time.strftime('%I:%M %p')}-{guild.timezone}")
         except:
             await ctx.channel.send("Failed to change reminder time. Remember to use military time in the format HH:MM TZ (09:30 MST)")
 
@@ -86,19 +81,10 @@ class ChoreCommands(commands.Cog):
     @commands.command(name="start")
     async def start_chore_announcement(self, ctx):
         guild = self.get_guild(ctx.guild)
-        time = datetime.datetime.strptime(guild.announcement_time, '%H:%M').time()
         if guild.job_started: 
             return
         else:
-            self.scheduler.add_job(self.show_chores_scheduled, 
-                                                 'cron', 
-                                                 hour = time.hour, 
-                                                 minute = time.minute, 
-                                                 timezone = guild.timezone, 
-                                                 args = [ctx], 
-                                                 id = guild.job_id)
-
-            guild.job_toggle()
+            self.start_job(ctx)
             
     @commands.command(name="stop")
     async def stop_chore_announcement(self, ctx):
@@ -106,8 +92,7 @@ class ChoreCommands(commands.Cog):
         if not guild.job_started:
             return
         else:
-            self.scheduler.remove_job(guild.job_id)
-            guild.job_toggle()
+            self.stop_job(guild)
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
@@ -134,21 +119,13 @@ class ChoreCommands(commands.Cog):
         guild = self.get_guild(ctx.guild)
         with open(f"data/{guild.guild_id}.json", "r") as read_file:
             data = json.load(read_file)
+        
         # check if a job was started during last save. if so then start job again
         if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
-            time = datetime.datetime.strptime(data["announcement_time"], '%H:%M').time()
-            self.scheduler.add_job(self.show_chores_scheduled, 
-                                                 'cron', 
-                                                 hour = time.hour, 
-                                                 minute = time.minute, 
-                                                 timezone = guild.timezone, 
-                                                 args = [ctx], 
-                                                 id = guild.job_id)
-            guild.job_toggle()
+            self.start_job(ctx)
             
         elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
-            self.scheduler.remove_job(data["job_id"])
-            guild.job_toggle()
+            self.stop_job(guild)
 
         await ctx.channel.send(data)
          
@@ -168,6 +145,30 @@ class ChoreCommands(commands.Cog):
                         channel = c
                         break
             await channel.send(embed=embed, view = view)
+            
+    async def start_job(self, ctx):
+        guild = self.get_guild(ctx.guild)
+        time = datetime.datetime.strptime(guild.announcement_time, self.time_format).time()
+        self.scheduler.add_job(self.show_chores_scheduled, 
+                               'cron', 
+                               hour = time.hour, 
+                               minute = time.minute, 
+                               timezone = guild.timezone, 
+                               args = [ctx], 
+                               id = guild.job_id)
+        guild.job_toggle()
+        
+    async def stop_job(self, guild):
+        self.scheduler.remove_job(guild.job_id)
+        guild.job_toggle()
+    
+    async def change_job_time(self, guild):
+        time = datetime.datetime.strptime(guild.announcement_time, self.time_format).time()
+        self.scheduler.reschedule_job(guild.job_id, 
+                                      trigger='cron',
+                                      hour = time.hour, 
+                                      minute = time.minute, 
+                                      timezone = guild.timezone)
             
     def setup(self):
         for guild in self.bot.guilds:
