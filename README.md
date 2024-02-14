@@ -12,7 +12,7 @@ The purpose of this project is to distribute and remind people in a dorm room to
 ## Add to your discord server
 1. Go [Here](https://discord.com/api/oauth2/authorize?client_id=1179619497733259344&permissions=2416127072&scope=bot)
 2. Add the bot to desired discord server
-3. Be aware you must have a role in the sever that is able to add bots to servers
+3. Be aware you must have a role that is able to add bots to servers
 
 ## Known Issues
 * ~~If the bot goes offline there isn't a way to recover data currently~~
