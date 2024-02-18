@@ -37,17 +37,20 @@ class ChoreCommands(commands.Cog):
         guild = self.get_guild(before.guild)
         if after.id in before.guild.get_role(guild.chore_role_id).members:
             guild.add_person(after)
-        elif after.id not in before.guild.get_role(guild.chore_role_id).members:
+        elif after.id not in before.guild.get_role(guild.chore_role_id).members and before.id in before.guild.get_role(guild.chore_role_id).members:
             guild.remove_person(after)
+         
         
     @commands.command(name="addchore")
     async def add_chore(self, ctx, *chore_name):
-        c = Chore(' '.join(chore_name[:]).title())
-        self.guilds[ctx.guild.id].add_chore(c)
+        if ctx.message.author.guild_permissions.administrator:
+            c = Chore(' '.join(chore_name[:]).title())
+            self.guilds[ctx.guild.id].add_chore(c)
     
     @commands.command(name="rmchore")
     async def remove_chore(self, ctx, *chore_name):
-        self.guilds[ctx.guild.id].remove_chore(' '.join(chore_name[:]))
+        if ctx.message.author.guild_permissions.administrator:
+            self.guilds[ctx.guild.id].remove_chore(' '.join(chore_name[:]))
     
     @commands.command(name="shchores")
     async def show_chores_command(self, ctx):
@@ -59,46 +62,51 @@ class ChoreCommands(commands.Cog):
         
     @commands.command(name="setchan")
     async def set_announcement_channel(self, ctx):
-        self.guilds[ctx.guild.id].set_announcement(ctx.channel.id)
-        await ctx.channel.send("Channel has been set")
+        if ctx.message.author.guild_permissions.administrator:
+            self.guilds[ctx.guild.id].set_announcement(ctx.channel.id)
+            await ctx.channel.send("Channel has been set")
         
     @commands.command(name="settime")
     async def set_guild_schedule_time(self, ctx, *time):
-        guild = self.get_guild(ctx.guild)
-        time_info = list(time)
-        try:
-            guild.timezone = str(pytz.timezone(time_info[1]))
-            valid_time = datetime.datetime.strptime(time_info[0], self.time_format).time()
-            guild.announcement_time = valid_time.strftime(self.time_format)   
-            if guild.job_started:
-                await self.change_job_time(guild)
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            time_info = list(time)
+            try:
+                guild.timezone = str(pytz.timezone(time_info[1]))
+                valid_time = datetime.datetime.strptime(time_info[0], self.time_format).time()
+                guild.announcement_time = valid_time.strftime(self.time_format)   
+                if guild.job_started:
+                    await self.change_job_time(guild)
                 
-            await ctx.channel.send(f"Reminder successfully set to {valid_time.strftime('%I:%M %p')}-{guild.timezone}")
-        except:
-            await ctx.channel.send("Failed to change reminder time. Remember to use military time in the format HH:MM TZ (09:30 MST)")
+                await ctx.channel.send(f"Reminder successfully set to {valid_time.strftime('%I:%M %p')}-{guild.timezone}")
+            except:
+                await ctx.channel.send("Failed to change reminder time. Remember to use military time in the format HH:MM TZ (09:30 MST)")
 
     
     @commands.command(name="start")
     async def start_chore_announcement(self, ctx):
-        guild = self.get_guild(ctx.guild)
-        if guild.job_started: 
-            return
-        else:
-            await self.start_job(guild)
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            if guild.job_started: 
+                return
+            else:
+                await self.start_job(guild)
             
     @commands.command(name="stop")
     async def stop_chore_announcement(self, ctx):
-        guild = self.get_guild(ctx.guild)
-        if not guild.job_started:
-            return
-        else:
-            await self.stop_job(guild)
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            if not guild.job_started:
+                return
+            else:
+                await self.stop_job(guild)
             
     @commands.command(name="assign")
     async def assign_chores(self, ctx):
-        guild = self.get_guild(ctx.guild)
-        for chore in guild.chore_list:
-            chore.set_person(random.choice(list(guild.person_list.keys())))
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            for chore in guild.chore_list:
+                chore.set_person(random.choice(list(guild.person_list.keys())))
             
     @commands.command(name="complete")
     async def complete_chore(self, ctx, *chore):
@@ -109,15 +117,17 @@ class ChoreCommands(commands.Cog):
     
     @commands.command(name="save")
     async def save_command(self, ctx):
-        guild = self.get_guild(ctx.guild)
-        await self.save_data(guild.guild_id, guild)
-        await ctx.channel.send("Chore information has been saved.")
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            await self.save_data(guild.guild_id, guild)
+            await ctx.channel.send("Chore information has been saved.")
         
     @commands.command(name="load")
     async def load_command(self, ctx):
-        guild = self.get_guild(ctx.guild)
-        await self.load_data(guild.guild_id, guild)
-        await ctx.channel.send("Chore information has been loaded.")
+        if ctx.message.author.guild_permissions.administrator:
+            guild = self.get_guild(ctx.guild)
+            await self.load_data(guild.guild_id, guild)
+            await ctx.channel.send("Chore information has been loaded.")
          
             
     async def show_chores_scheduled(self, guild):

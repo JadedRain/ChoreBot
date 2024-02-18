@@ -31,7 +31,7 @@ class GuildChore:
         self.person_list[member.id] = member.display_name
                 
     def remove_person(self, member):
-        member_name = self.person_list.pop(member.id)
+        member_name = self.person_list.pop(str(member.id))
         for chore in self.chore_list:
             if chore.get_person() == member_name:
                 chore.set_person(None)
