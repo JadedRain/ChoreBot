@@ -1,6 +1,4 @@
 import datetime
-import discord
-import discord.ui
 import json
 import pytz
 import random
@@ -8,7 +6,6 @@ from discord.ext import commands
 from pclasses.chore import Chore
 from pclasses.guild_chores import GuildChore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 
 
 class ChoreCommands(commands.Cog):
@@ -201,7 +198,7 @@ class ChoreCommands(commands.Cog):
     
     def assign_job(self):
         for guild in self.guilds:
-            self.assign(self.guilds[guild])
+            self.assign(guild)
             
     def get_guild(self, guild):
         return self.guilds[guild.id]
