@@ -35,9 +35,9 @@ class ChoreCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         guild = self.get_guild(before.guild)
-        if after.id in before.guild.get_role(guild.chore_role_id).members:
+        if after.id in self.get_role_members(before):
             guild.add_person(after)
-        elif after.id not in before.guild.get_role(guild.chore_role_id).members and before.id in before.guild.get_role(guild.chore_role_id).members:
+        elif after.id not in self.get_role_members(before) and before.id in self.get_role_members(before):
             guild.remove_person(after)
          
         
@@ -84,7 +84,7 @@ class ChoreCommands(commands.Cog):
 
     
     @commands.command(name="start")
-    async def start_chore_announcement(self, ctx):
+    async def start_announcement_command(self, ctx):
         if ctx.message.author.guild_permissions.administrator:
             guild = self.get_guild(ctx.guild)
             if guild.job_started: 
@@ -93,7 +93,7 @@ class ChoreCommands(commands.Cog):
                 await self.start_job(guild)
             
     @commands.command(name="stop")
-    async def stop_chore_announcement(self, ctx):
+    async def stop_announcement_command(self, ctx):
         if ctx.message.author.guild_permissions.administrator:
             guild = self.get_guild(ctx.guild)
             if not guild.job_started:
@@ -102,14 +102,13 @@ class ChoreCommands(commands.Cog):
                 await self.stop_job(guild)
             
     @commands.command(name="assign")
-    async def assign_chores(self, ctx):
+    async def assign_command(self, ctx):
         if ctx.message.author.guild_permissions.administrator:
             guild = self.get_guild(ctx.guild)
-            for chore in guild.chore_list:
-                chore.set_person(random.choice(list(guild.person_list.keys())))
+            self.assign(guild)
             
     @commands.command(name="complete")
-    async def complete_chore(self, ctx, *chore):
+    async def complete_command(self, ctx, *chore):
         guild = self.get_guild(ctx.guild)
         for c in guild.chore_list:
             if c.get_chore() == ' '.join(chore[:]).title() and ctx.author.id == c.get_person():
@@ -128,7 +127,8 @@ class ChoreCommands(commands.Cog):
             guild = self.get_guild(ctx.guild)
             await self.load_data(guild.guild_id, guild)
             await ctx.channel.send("Chore information has been loaded.")
-         
+    
+
             
     async def show_chores_scheduled(self, guild):
         guild.chore_view.create_pages(guild.chore_list)
@@ -154,6 +154,7 @@ class ChoreCommands(commands.Cog):
                                timezone = guild.timezone, 
                                args = [guild], 
                                id = guild.job_id)
+        
         guild.job_toggle()
         
     async def stop_job(self, guild):
@@ -187,10 +188,26 @@ class ChoreCommands(commands.Cog):
     def setup(self):
         for guild in self.bot.guilds:
             self.guilds[guild.id] = GuildChore(guild)
+        self.scheduler.add_job(self.assign_job,
+                               'cron',
+                               day_of_week = 'mon',
+                               hour = 9,
+                               timezone = 'mst')
         self.scheduler.start()
+        
+    def assign(self, guild):
+        for chore in guild.chore_list:
+            chore.set_person(random.choice(list(guild.person_list.keys())))
+    
+    def assign_job(self):
+        for guild in self.guilds:
+            self.assign(self.guilds[guild])
             
     def get_guild(self, guild):
         return self.guilds[guild.id]
+    
+    def get_role_members(self, before):
+        return before.guild.get_role(before.guild.chore_role_id).members
             
 async def setup(bot):
     await bot.add_cog(ChoreCommands(bot))
