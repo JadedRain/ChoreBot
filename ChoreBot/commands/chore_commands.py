@@ -12,6 +12,7 @@ class ChoreCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.time_format = '%H:%M'
+        self.default_channel = "general"
         self.guilds = {}
         self.scheduler = AsyncIOScheduler()
     
@@ -122,25 +123,31 @@ class ChoreCommands(commands.Cog):
     async def load_command(self, ctx):
         if ctx.message.author.guild_permissions.administrator:
             guild = self.get_guild(ctx.guild)
-            await self.load_data(guild.guild_id, guild)
-            await ctx.channel.send("Chore information has been loaded.")
+            data = self.load_data(guild.guild_id, guild)
+            guild.load_data(data)
+        
+            # check if a job was started during last save. if so then start job again
+            if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
+                await self.start_job(guild)
+            elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
+                await self.stop_job(guild)
+                await ctx.channel.send("Chore information has been loaded.")
     
-
-            
+       
     async def show_chores_scheduled(self, guild):
-        guild.chore_view.create_pages(guild.chore_list)
-        embed = guild.chore_view.chore_list_embed
-        view = guild.chore_view
+        view = guild.get_view()
+        view.create_pages(guild.chore_list)
         if len(view.chore_pages) > 0:
             channel = None
             if guild.announcement_channel:
                 channel = self.bot.get_channel(guild.announcement_channel)
             else:
-                for c in guild.guild.text_channels:
-                    if c.name.lower() == "general":
+                self.bot.get_guild
+                for c in self.bot.get_guild(guild.guild_id).text_channels:
+                    if c.name.lower() == self.default_channel:
                         channel = c
                         break
-            await channel.send(embed=embed, view = view)
+            await channel.send(embed=view.chore_list_embed, view = view)
             
     async def start_job(self, guild):
         time = datetime.datetime.strptime(guild.announcement_time, self.time_format).time()
@@ -169,18 +176,11 @@ class ChoreCommands(commands.Cog):
     async def save_data(self, file, data):
         with open(f"data/{file}.json", "w+") as write_file:
             json.dump(data, default=lambda o: o.__dict__, fp=write_file, indent=4)
-            
+    
     async def load_data(self, file, guild):
         with open(f"data/{file}.json", "r") as read_file:
             data = json.load(read_file)
-            
-        guild.load_data(data)
-        
-        # check if a job was started during last save. if so then start job again
-        if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
-            await self.start_job(guild)
-        elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
-            await self.stop_job(guild)
+        return data
             
     def setup(self):
         for guild in self.bot.guilds:
