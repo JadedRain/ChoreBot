@@ -20,6 +20,10 @@ class ChoreCommands(commands.Cog):
     async def on_ready(self):
         self.setup()
         await self.load_all_guilds()
+        await self.scheduler.add_job(self.auto_save, 
+                               'cron', 
+                               hour = '*', 
+                               id = "autosave")
         print("Chore commands loaded")
     
     @commands.Cog.listener()
@@ -185,14 +189,22 @@ class ChoreCommands(commands.Cog):
                 await self.stop_job(guild)
       
     async def load_all_guilds(self):
-        for g in self.guilds:
-            guild = self.guilds[g]
+        for id in self.guilds:
+            guild = self.guilds[id]
             await self.load(guild)
+          
+        
     
     async def load(self, guild):
             data = await self.load_data(guild.guild_id, guild)
             guild.load_data(data)
             await self.job_load(guild, data)
+
+    async def auto_save(self):
+        for id in self.guilds:
+            guild = self.guilds[id]
+            await self.save_data(id, guild)
+        
             
     def setup(self):
         for guild in self.bot.guilds:
