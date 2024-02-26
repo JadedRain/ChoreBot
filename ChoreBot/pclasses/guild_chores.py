@@ -24,8 +24,10 @@ class GuildChore:
     
     def remove_chore(self, chore_name):
         for chore in self.chore_list:
-            if chore.get_chore().lower() == chore_name:
+            if chore.get_chore().lower() == chore_name.lower():
                 self.chore_list.remove(chore)
+                return True
+        return False
     
     def add_person(self, member):
         self.person_list[member.id] = member.display_name

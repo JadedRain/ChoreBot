@@ -19,6 +19,7 @@ class ChoreCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         self.setup()
+        await self.load_all_guilds()
         print("Chore commands loaded")
     
     @commands.Cog.listener()
@@ -48,7 +49,8 @@ class ChoreCommands(commands.Cog):
     @commands.command(name="rmchore")
     async def remove_chore(self, ctx, *chore_name):
         if ctx.message.author.guild_permissions.administrator:
-            self.guilds[ctx.guild.id].remove_chore(' '.join(chore_name[:]))
+            if self.guilds[ctx.guild.id].remove_chore(' '.join(chore_name[:])):
+                await ctx.channel.send(f"{' '.join(chore_name[:]).title()} removed.")
     
     @commands.command(name="shchores")
     async def show_chores_command(self, ctx):
@@ -123,15 +125,8 @@ class ChoreCommands(commands.Cog):
     async def load_command(self, ctx):
         if ctx.message.author.guild_permissions.administrator:
             guild = self.get_guild(ctx.guild)
-            data = self.load_data(guild.guild_id, guild)
-            guild.load_data(data)
-        
-            # check if a job was started during last save. if so then start job again
-            if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
-                await self.start_job(guild)
-            elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
-                await self.stop_job(guild)
-                await ctx.channel.send("Chore information has been loaded.")
+            await self.load(guild)
+            await ctx.channel.send("Chore information has been loaded.")
     
        
     async def show_chores_scheduled(self, guild):
@@ -181,6 +176,23 @@ class ChoreCommands(commands.Cog):
         with open(f"data/{file}.json", "r") as read_file:
             data = json.load(read_file)
         return data
+    
+    async def job_load(self, guild, data):
+            # check if a job was started during last save. if so then start job again
+            if data["job_started"] and not self.scheduler.get_job(data["job_id"]):
+                await self.start_job(guild)
+            elif not data["job_started"] and self.scheduler.get_job(data["job_id"]):
+                await self.stop_job(guild)
+      
+    async def load_all_guilds(self):
+        for g in self.guilds:
+            guild = self.guilds[g]
+            await self.load(guild)
+    
+    async def load(self, guild):
+            data = await self.load_data(guild.guild_id, guild)
+            guild.load_data(data)
+            await self.job_load(guild, data)
             
     def setup(self):
         for guild in self.bot.guilds:
