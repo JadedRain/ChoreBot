@@ -14,11 +14,14 @@ The purpose of this project is to distribute and remind people in a dorm room to
 2. Add the bot to desired discord server
 3. Be aware you must have a role that is able to add bots to servers
 
+## Ideas to explore
+1. Update autosave to save everytime changes are made rather than save every hour for every server
+
 ## Known Issues
 * ~~If the bot goes offline there isn't a way to recover data currently~~
 * ~~Reminder time can't be changed~~
 * ~~Chores not automattically assigned~~
-* No autosave/autoload
+* ~~No autosave/autoload~~
 * ~~Anybody can add/remove chores~~
 * Alignment broken when showing chores
 * Can't customize when chores are assigned
