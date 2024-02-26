@@ -20,7 +20,7 @@ class ChoreCommands(commands.Cog):
     async def on_ready(self):
         self.setup()
         await self.load_all_guilds()
-        await self.scheduler.add_job(self.auto_save, 
+        self.scheduler.add_job(self.auto_save, 
                                'cron', 
                                hour = '*', 
                                id = "autosave")

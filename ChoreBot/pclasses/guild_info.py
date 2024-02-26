@@ -1,4 +1,3 @@
-import discord
 
 class GuildInfo():
     count = 0

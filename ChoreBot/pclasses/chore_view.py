@@ -25,9 +25,9 @@ class ChoreView(discord.ui.View):
         page = page_setup()
         for chore in chores:
              if chore.get_person() == None:
-                 page.add_field(name = f"Chore: {chore.get_chore()}", value = f"Person: Unassigned \n Completed: {('No', 'Yes')[int(chore.completed)]}")
+                 page.add_field(name = f"Chore: {chore.get_chore()}", value = f"Person: Unassigned \n Completed: {('No', 'Yes')[int(chore.completed)]}", inline=False)
              else:
-                 page.add_field(name = f"Chore: {chore.get_chore()}", value = f"Person: <@{chore.get_person()}> \n Completed: {('No', 'Yes')[int(chore.completed)]}")    
+                 page.add_field(name = f"Chore: {chore.get_chore()}", value = f"Person: <@{chore.get_person()}> \n Completed: {('No', 'Yes')[int(chore.completed)]}", inline=False)    
              if len(page.fields) == self.page_length:
                  self.chore_pages.append(page)
                  page = page_setup()
