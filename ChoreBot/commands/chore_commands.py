@@ -38,7 +38,7 @@ class ChoreCommands(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         guild = self.get_guild(before.guild)
-        if after.id in self.get_role_members(before):
+        if after.id in self.get_role_members(after):
             guild.add_person(after)
         elif after.id not in self.get_role_members(before) and before.id in self.get_role_members(before):
             guild.remove_person(after)
@@ -217,8 +217,24 @@ class ChoreCommands(commands.Cog):
         self.scheduler.start()
         
     def assign(self, guild):
+        temp1 = list(guild.person_list.keys())
+        temp2 = []
+        use_list_one = True
         for chore in guild.chore_list:
-            chore.set_person(random.choice(list(guild.person_list.keys())))
+            if use_list_one:
+                person = random.choice(temp1)
+                temp1.remove(person)
+                temp2.append(person)
+                if len(temp1) == 0:
+                    use_list_one = False
+            else:
+                person = random.choice(temp2)
+                temp2.remove(person)
+                temp1.append(person)
+                if len(temp2) == 0:
+                    use_list_one = True
+            
+            chore.set_person(person)
     
     def assign_job(self):
         for guild in self.guilds:
@@ -228,7 +244,10 @@ class ChoreCommands(commands.Cog):
         return self.guilds[guild.id]
     
     def get_role_members(self, before):
-        return before.guild.get_role(before.guild.chore_role_id).members
+        member_ids = []
+        for member in before.guild.get_role(self.get_guild(before.guild).chore_role_id).members:
+            member_ids.append(member.id)
+        return member_ids
             
 async def setup(bot):
     await bot.add_cog(ChoreCommands(bot))
