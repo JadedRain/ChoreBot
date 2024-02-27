@@ -23,5 +23,5 @@ The purpose of this project is to distribute and remind people in a dorm room to
 * ~~Chores not automattically assigned~~
 * ~~No autosave/autoload~~
 * ~~Anybody can add/remove chores~~
-* Alignment broken when showing chores
+* ~~Alignment broken when showing chores~~
 * Can't customize when chores are assigned
